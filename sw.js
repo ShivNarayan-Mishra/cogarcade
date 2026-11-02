@@ -8,7 +8,7 @@
  * IMPORTANT: bump CACHE whenever a file in SHELL changes, otherwise returning visitors keep the old
  * version until their second reload.
  */
-const CACHE = 'cogarcade-v6';
+const CACHE = 'cogarcade-v7';
 /**
  * Browsers refuse to serve a response whose `redirected` flag is set to a navigation request
  * (net::ERR_FAILED). Hosts such as Cloudflare redirect /index.html to /, so every response is
