@@ -118,13 +118,15 @@ whole React API (no fragments, portals, refs on components or suspense).
 
 | Control | Where |
 | --- | --- |
-| CSP: `default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'` | `index.html` meta tag and `_headers` |
+| CSP: `default-src 'self'; script-src 'self'; style-src 'self'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'`, plus `connect-src 'none'` in the page meta tag and `connect-src 'self'` in the `_headers` header | `index.html` and `_headers` |
 | No inline scripts or `<style>` blocks — styles are set through CSSOM (`el.style.x = …`), which `style-src 'self'` allows | `runtime.js` |
 | No `eval` / `new Function` (Digit uses lambdas) | `games.js` |
 | Every generator loop is bounded and has a deterministic fallback | `games.js` |
 | `localStorage` is validated on load: `__proto__`/`constructor`/`prototype` keys dropped, numbers clamped, game ids whitelisted, presets validated against the registry, preset names stripped of control characters and capped at 32 chars | `engine.js` |
 | One reusable `AudioContext`; each oscillator/gain is disconnected in `onended` | `engine.js` |
 | Service worker ignores cross-origin requests | `sw.js` |
+
+The header uses `connect-src 'self'` because a service worker inherits the CSP of its own script response; `'none'` would block the worker's fetches and break every page load. (The app itself makes no network requests.)
 
 `frame-ancestors` only works as an HTTP header, so clickjacking protection needs the `_headers` file (Cloudflare Pages / Netlify).
 **Ads:** the sponsor slot (`AdBannerSlot`, `data-npa="1"` for non-personalised ads) is empty and collapsed by default. A real ad
