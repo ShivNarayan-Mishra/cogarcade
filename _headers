@@ -1,7 +1,9 @@
 # Cloudflare Pages / Netlify security headers (file name must be exactly "_headers").
+# NOTE: connect-src is 'self' (not 'none') on purpose: a service worker inherits the CSP sent with
+# /sw.js, and 'none' would block the worker's own fetches (every page load then fails with ERR_FAILED).
 # A+ on securityheaders.com. frame-ancestors only works as an HTTP header, which is why it lives here.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; form-action 'none'; base-uri 'none'; manifest-src 'self'; worker-src 'self'
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
