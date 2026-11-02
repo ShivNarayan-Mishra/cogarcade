@@ -4,7 +4,7 @@
   "short_name": "CogArcade",
   "description": "Offline cognitive-assessment practice: 14 procedurally generated placement-test games with adaptive difficulty.",
   "lang": "en",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

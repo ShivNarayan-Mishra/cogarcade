@@ -8,7 +8,26 @@
  * IMPORTANT: bump CACHE whenever a file in SHELL changes, otherwise returning visitors keep the old
  * version until their second reload.
  */
-const CACHE = 'cogarcade-v5';
+const CACHE = 'cogarcade-v6';
+/**
+ * Browsers refuse to serve a response whose `redirected` flag is set to a navigation request
+ * (net::ERR_FAILED). Hosts such as Cloudflare redirect /index.html to /, so every response is
+ * re-wrapped without the flag before it is cached or served.
+ */
+const clean = (res) =>
+  res.redirected
+    ? res
+        .blob()
+        .then(
+          (b) =>
+            new Response(b, {
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+            }),
+        )
+    : res;
+
 const SHELL = [
   './',
   './index.html',
@@ -26,7 +45,16 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => Promise.all(SHELL.map((url) => cache.add(url).catch(() => {}))))
+      .then((cache) =>
+        Promise.all(
+          SHELL.map((url) =>
+            fetch(url)
+              .then((res) => (res.ok ? clean(res) : null))
+              .then((res) => res && cache.put(url, res))
+              .catch(() => {}),
+          ),
+        ),
+      )
       .then(() => self.skipWaiting()),
   );
 });
@@ -50,14 +78,16 @@ self.addEventListener('fetch', (event) => {
         .then((res) => {
           if (res && res.ok) {
             const copy = res.clone();
-            caches.open(CACHE).then((cache) => cache.put(req, copy));
+            Promise.resolve(clean(copy)).then((c) =>
+              caches.open(CACHE).then((cache) => cache.put(req, c)),
+            );
           }
           return res;
         })
         .catch(() => null);
       if (cached) {
         event.waitUntil(refresh);
-        return cached;
+        return clean(cached);
       }
       return refresh.then(
         (res) => res || (req.mode === 'navigate' ? caches.match('./index.html') : Response.error()),
